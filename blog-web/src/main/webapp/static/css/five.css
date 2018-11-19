@@ -1,0 +1,159 @@
+.cssload-loader-container {
+    width: 90px;
+    height: 37px;
+    /* float: left; */
+}
+
+.cssload-loader-container *{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+        -o-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+}
+
+.cssload-abs-center {
+    margin: auto;
+    /* position: absolute; */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+
+
+.cssload-olympicloader {
+    position: relative;
+}
+.cssload-olympicloader .cssload-loader-circle {
+    width: 27px;
+    height: 27px;
+    border: 3px solid rgb(204,204,204);
+    border-radius: 50%;
+    animation: spin 520ms infinite linear;
+        -o-animation: spin 520ms infinite linear;
+        -ms-animation: spin 520ms infinite linear;
+        -webkit-animation: spin 520ms infinite linear;
+        -moz-animation: spin 520ms infinite linear;
+    float: left;
+}
+.cssload-olympicloader .cssload-loader-circle.cssload-first {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-top-color: rgb(0,106,176);
+}
+.cssload-olympicloader .cssload-loader-circle.cssload-second {
+    position: absolute;
+    top: 0;
+    left: 31px;
+    border-right-color: rgb(29,24,21);
+}
+.cssload-olympicloader .cssload-loader-circle.cssload-third {
+    position: absolute;
+    top: 0;
+    left: 62px;
+    border-bottom-color: rgb(5,147,64);
+}
+.cssload-olympicloader .cssload-loader-circle.cssload-fourth {
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    border-left-color: rgb(239,167,13);
+}
+.cssload-olympicloader .cssload-loader-circle.cssload-fifth {
+    position: absolute;
+    top: 10px;
+    left: 47px;
+    border-right-color: rgb(220,47,31);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@-o-keyframes spin {
+    from {
+        -o-transform: rotate(0deg);
+    }
+    to {
+        -o-transform: rotate(360deg);
+    }
+}
+
+@-ms-keyframes spin {
+    from {
+        -ms-transform: rotate(0deg);
+    }
+    to {
+        -ms-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@-moz-keyframes spin {
+    from {
+        -moz-transform: rotate(0deg);
+    }
+    to {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+
+
+/* ##################提交中loading##################### */
+.grebtn {
+ display:inline-block;
+ /* padding:0.25em 1.25em; */
+ border:1px solid;
+ /* border-radius:2px; */
+ vertical-align:bottom;
+ font-weight:inherit;
+ /* border-color:#208000 #1F7F00; */
+ /* background-color:#289600; */
+ /* box-shadow:inset 0 0 1px rgba(255,255,255,.6), 0 1px #8DBF62; */
+ color:#fff;
+ /* text-shadow:0 -1px #137900; */
+ text-decoration:none;
+ 
+}
+.dotting {
+ display:inline-block;
+ min-width:2px;
+ min-height:2px;
+ box-shadow:2px 0 currentColor, 6px 0 currentColor, 10px 0 currentColor;
+ -webkit-animation:dot 4s infinite step-start both;
+ animation:dot 4s infinite step-start both;
+ *zoom: expression(this.innerHTML = '...'); /* IE7 */
+}
+.dotting:before { content: '...'; } /* IE8 */
+.dotting::before { content: ''; }
+:root .dotting { margin-right: 8px; } /* IE9+,FF,CH,OP,SF */
+ 
+@-webkit-keyframes dot {
+ 25% { box-shadow: none; }
+ 50% { box-shadow: 2px 0 currentColor; }
+ 75% { box-shadow: 2px 0 currentColor, 6px 0 currentColor; }
+}
+@keyframes dot {
+ 25% { box-shadow: none; }
+ 50% { box-shadow: 2px 0 currentColor; }
+ 75% { box-shadow: 2px 0 currentColor, 6px 0 currentColor; }
+}

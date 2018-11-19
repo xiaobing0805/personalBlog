@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.youngtao.blog.data.mapper.user.RecordAccessMapper">
+	
+	<resultMap id="BaseResultMap" type="org.youngtao.blog.data.domain.user.RecordAccess" > 
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="session_id" property="sessionId" jdbcType="VARCHAR" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="modifed_time" property="modifedTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="Base_Column_List"> 
+		`id`,`session_id`,`created_time`,`modifed_time`
+	</sql>
+	
+	<insert id="addRecordAccess" parameterType="String">
+		INSERT INTO record_access (`session_id`)
+		VALUES
+			(#{sessionId});
+	</insert>
+	
+	<select id="getTotalOnline" resultType="Int">
+		select count(1) from record_access;
+	</select>
+</mapper>

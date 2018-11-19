@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.youngtao.blog.data.mapper.user.RoleMapper">
+	
+	<resultMap id="BaseResultMap" type="org.youngtao.blog.data.domain.user.Role" > 
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="is_disable" property="isDisable" jdbcType="TINYINT" />
+		<result column="creator" property="creator" jdbcType="VARCHAR" />
+		<result column="operator" property="operator" jdbcType="VARCHAR" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="modifed_time" property="modifedTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="Base_Column_List"> 
+		`id`,`name`,`remarks`,`is_disable`,`creator`,`operator`,`created_time`,`modifed_time`
+	</sql>
+	
+	<select id="findRoleByUserId" parameterType="String" resultMap="BaseResultMap">
+		select r.* 
+		from role r,user_role_rel urr 
+		where r.id = urr.role_id 
+		and urr.user_id = #{userId}
+		and r.is_disable = 0;
+	</select>
+	
+	<select id="findRoleByPage" resultMap="BaseResultMap">
+	   SELECT
+		    <include refid="Base_Column_List" />
+		FROM
+		    `role`
+		WHERE
+		    1 = 1 
+		<if test="roleName != null and roleName != ''">
+            AND `name` LIKE CONCAT('%',#{roleName},'%')
+		</if>
+		ORDER BY
+		    modifed_time DESC
+		LIMIT #{start},#{end}
+	</select>
+	
+	<select id="findTotalRoleByPage" parameterType="String" resultType="Int">
+	   SELECT
+            COUNT(1)
+        FROM
+            `role`
+        WHERE
+            1 = 1 
+        <if test="roleName != null and roleName != ''">
+            AND `name` LIKE CONCAT('%',#{roleName},'%')
+        </if>
+	</select>
+</mapper>

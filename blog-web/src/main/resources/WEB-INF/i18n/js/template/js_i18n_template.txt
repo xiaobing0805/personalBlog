@@ -1,0 +1,4 @@
+$(function(){
+	'use strict';
+	$.i18n = $.extend({},$.i18n,{i18n.content});
+});

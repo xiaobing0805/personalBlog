@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.youngtao</groupId>
+		<artifactId>blog</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>blog-web</artifactId>
+	<name>blog-web</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.youngtao</groupId>
+			<artifactId>blog-permission</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>javax.el</artifactId>
+			</dependency>
+		<dependency>
+		    <groupId>net.sf.oval</groupId>
+		    <artifactId>oval</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>javax.annotation</groupId>
+		    <artifactId>javax.annotation-api</artifactId>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile> <!-- 可以通过 -P ID 来激活 -->
+			<id>dev</id> <!-- ID 标识符 -->
+			<properties>
+				<env>dev</env> <!-- properties 定义 key-value, 这里 key 是 env, value 是 PROD -->
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault> <!-- 默认激活 -->
+			</activation>
+		</profile>
+		<profile> <!-- 可以通过 -P ID 来激活 -->
+			<id>prod</id> <!-- ID 标识符 -->
+			<properties>
+				<env>prod</env> <!-- properties 定义 key-value, 这里 key 是 env, value 是 TEST -->
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<finalName>YoungTao-Blog</finalName>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId> <!-- 官网给出的配置，没有配置 groupId，这里也不配置 -->
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- ID 标识，命名随意 -->
+						<phase>package</phase> <!-- 绑定到 PACKAGE 生命周期阶段 -->
+						<goals>
+							<goal>single</goal>  <!-- 在 PACKAGE 生命周期阶段仅执行一次 -->
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor> <!-- 自定义打包的配置文件 -->
+					</descriptors>
+					<appendAssemblyId>false</appendAssemblyId> <!-- 设为 FALSE, 防止 WAR 包名加入 assembly.xml 中的 ID -->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

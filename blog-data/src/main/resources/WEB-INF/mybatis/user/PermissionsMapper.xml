@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.youngtao.blog.data.mapper.user.PermissionsMapper">
+	
+	<resultMap id="BaseResultMap" type="org.youngtao.blog.data.domain.user.Permissions" > 
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="zh_cn_name" property="zhCNName" jdbcType="VARCHAR" />
+		<result column="zh_hk_name" property="zhHKName" jdbcType="VARCHAR" />
+		<result column="en_name" property="enName" jdbcType="VARCHAR" />
+		<result column="permissions_name" property="permissionsName" jdbcType="VARCHAR" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="icon" property="icon" jdbcType="VARCHAR" />
+		<result column="pms_or_ctl" property="pmsOrCtl" jdbcType="VARCHAR" />
+		<result column="parent_id" property="parentId" jdbcType="BIGINT" />
+		<result column="is_disable" property="isDisable" jdbcType="TINYINT" />
+		<result column="creator" property="creator" jdbcType="VARCHAR" />
+		<result column="operator" property="operator" jdbcType="VARCHAR" />
+		<result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+		<result column="modifed_time" property="modifedTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="Base_Column_List"> 
+		`id`,`zh_cn_name`,`zh_hk_name`,`en_name`,`permissions_name`,`remarks`,`url`,`icon`,`pms_or_ctl`, `parent_id` ,`is_disable`,`creator`,`operator`,`created_time`,`modifed_time`
+	</sql>
+	
+	<select id="findPermissionsByUserId" parameterType="String" resultMap="BaseResultMap">
+			SELECT
+				<include refid="Base_Column_List" />
+			FROM
+				permissions
+			WHERE
+				FIND_IN_SET(
+					id,
+					(
+						queryPermissionsInfo ( 
+							(
+								SELECT
+									Group_concat(rpr.permissions_id)
+								FROM
+									role_permissions_rel rpr
+								WHERE
+									rpr.role_id IN (
+										SELECT
+											urr.role_id
+										FROM
+											user_role_rel urr
+										WHERE
+											urr.user_id = #{userId}
+									)
+							)
+						)
+					)
+				) ORDER BY priority;
+	</select>
+</mapper>

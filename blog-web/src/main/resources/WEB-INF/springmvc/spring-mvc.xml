@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+           http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+           http://www.springframework.org/schema/aop   
+           http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+           http://www.springframework.org/schema/tx  
+           http://www.springframework.org/schema/tx/spring-tx-4.0.xsd  
+           http://www.springframework.org/schema/context  
+           http://www.springframework.org/schema/context/spring-context-4.0.xsd
+           http://www.springframework.org/schema/mvc  
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd"
+	default-autowire="byName">
+	<!-- 通过mvc:resources设置静态资源，这样servlet就会处理这些静态资源，而不通过控制器 -->
+	<!-- 设置不过滤内容，比如:css,jquery,img 等资源文件 -->
+	<mvc:resources location="/static/" mapping="/static/**" />
+	<!-- <mvc:resources location="/css/" mapping="/css/**" /> <mvc:resources 
+		location="/js/" mapping="/js/**" /> <mvc:resources location="/images/" mapping="/images/**" 
+		/> <mvc:resources location="/fonts/" mapping="/fonts/**" /> -->
+
+	<!-- mvc:view-controller可以在不需要Controller处理request的情况，转向到设置的View -->
+	<!-- 像下面这样设置，如果请求为/，则不通过controller，而直接解析为/index.jsp -->
+	<mvc:view-controller path="/" view-name="/public/blog" />
+	<!-- 当在web.xml 中 DispatcherServlet使用 <url-pattern>/</url-pattern> 映射时，能映射静态资源 -->
+	<mvc:default-servlet-handler />
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<!-- 配置jsp路径前缀 -->
+		<property name="prefix" value="/pages/"></property>
+		<!-- 配置URl后缀 -->
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="uploadTempDir" value="tmp"></property>
+		<property name="maxInMemorySize" value="4194304" />
+		<!-- 最大内存大小 -->
+		<property name="maxUploadSize" value="4194304" />
+		<!-- 最大文件大小，1024*1024*4 = 4M -->
+	</bean>
+
+	<!-- 添加注解驱动 -->
+	<mvc:annotation-driven />
+	
+	<!-- 指定Sping组件扫描的基本包路径 -->
+	<context:component-scan base-package="org.youngtao.blog.controller">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<context:component-scan base-package="org.youngtao.blog.permission.controller">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<context:component-scan base-package="org.youngtao.blog.i18n">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+	</context:component-scan>
+	
+	<context:component-scan base-package="org.youngtao.blog.validation">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+	</context:component-scan>
+	
+	<context:component-scan base-package="org.youngtao.blog.log">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+	
+	<context:component-scan base-package="org.youngtao.blog.permission.plugin.controlleradvice">
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+	<!-- proxy-target-class默认"false",更改为"ture"使用CGLib动态代理 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	<aop:config proxy-target-class="true"/>
+
+	<!-- 控制器异常处理 -->
+	<bean id="exceptionHandlerExceptionResolver"
+		class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" />
+		
+	<!-- 以下 validator  ConversionService 在使用 mvc:annotation-driven 会 自动注册-->  
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">  
+	    <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>  
+	    <!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->  
+	    <property name="validationMessageSource" ref="messageSource"/>  
+	</bean>
+    
+	<!-- 配置国际化资源文件路径 -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<!-- 定义消息资源文件的相对路径 -->
+				<value>WEB-INF/i18n/validate</value>
+				<value>WEB-INF/i18n/message</value>
+			</list>
+		</property> 
+		<!-- 如果在国际化资源文件中找不到对应代码的信息，就用这个代码作为名称  -->
+        <property name="useCodeAsDefaultMessage" value="true"/>  
+        <property name="defaultEncoding" value="UTF-8"/> 
+        <property name="cacheSeconds" value="-1"/>
+	</bean>
+	<!-- 基于Cookie的本地化解析器 -->
+	 <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+	 	<property name="cookieMaxAge" value="-1"/>
+	 	<property name="defaultLocale" value="zh_CN"/>
+	 	<property name="cookieName" value="lang" />
+	 </bean>
+	<!--<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />-->
+
+ 	<!-- 返回json 方法一 需要导入 fastjson.jar包 -->  
+	<mvc:annotation-driven validator="validator">
+        <mvc:message-converters register-defaults="false">
+            <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+            <bean id="fastJsonHttpMessageConverter" class="org.youngtao.blog.permission.plugin.messageconverter.GlobalHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+					<array>
+						<value>QuoteFieldNames</value>
+						<value>UseISO8601DateFormat</value>
+						<value>WriteMapNullValue</value>
+						<value>WriteNullStringAsEmpty</value>
+						<value>WriteNullListAsEmpty</value>
+						<value>WriteNullNumberAsZero</value>
+						<value>BrowserCompatible</value>
+						<value>PrettyFormat</value>
+					</array>
+				</property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+</beans>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+          
+    <!-- 缓存管理器 使用Ehcache实现 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:WEB-INF/cache/ehcache.xml"/>
+    </bean>
+
+    <!-- 凭证匹配器 -->
+    <bean id="credentialsMatcher" class="org.youngtao.blog.permission.credentials.RetryLimitHashedCredentialsMatcher">
+        <constructor-arg ref="cacheManager"/>
+        <property name="hashAlgorithmName" value="${shiro.matcher.hashAlgorithmName}"/>
+        <property name="hashIterations" value="${shiro.matcher.hashIterations}"/>
+        <property name="storedCredentialsHexEncoded" value="${shiro.matcher.storedCredentialsHexEncoded}"/>
+    </bean>
+
+    <!-- Realm实现 -->
+    <bean id="userRealm" class="org.youngtao.blog.permission.realm.UserRealm">
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>
+        <property name="cachingEnabled" value="${shiro.realm.cachingEnabled}"/>
+        <property name="authenticationCachingEnabled" value="${shiro.realm.authenticationCachingEnabled}"/>
+        <property name="authenticationCacheName" value="${shiro.realm.authenticationCacheName}"/>
+        <property name="authorizationCachingEnabled" value="${shiro.realm.authorizationCachingEnabled}"/>
+        <property name="authorizationCacheName" value="${shiro.realm.authorizationCacheName}"/>
+    </bean>
+    
+    <!-- Realm实现 -->
+    <bean id="myRealm" class="org.youngtao.blog.permission.realm.UserRealm">
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>
+        <property name="cachingEnabled" value="${shiro.realm.cachingEnabled}"/>
+        <property name="authenticationCachingEnabled" value="${shiro.realm.authenticationCachingEnabled}"/>
+        <property name="authenticationCacheName" value="${shiro.realm.authenticationCacheName}"/>
+        <property name="authorizationCachingEnabled" value="${shiro.realm.authorizationCachingEnabled}"/>
+        <property name="authorizationCacheName" value="${shiro.realm.authorizationCacheName}"/>
+    </bean>
+
+    <!-- 会话ID生成器 -->
+    <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
+    
+    <!-- 会话Cookie模板 -->
+    <bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="${shiro.sid.cookie.name}"/>
+        <property name="domain" value="${shiro.uid.cookie.domain}"/>
+        <property name="path" value="${shiro.uid.cookie.path}"/>
+        <property name="httpOnly" value="${shiro.uid.cookie.httpOnly}"/>
+        <property name="maxAge" value="${shiro.uid.cookie.maxAge}"/>
+    </bean>
+    
+    <!-- 会话DAO -->
+    <bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">
+        <property name="activeSessionsCacheName" value="shiro-activeSessionCache"/>
+        <property name="sessionIdGenerator" ref="sessionIdGenerator"/>
+    </bean>
+    
+    <!-- 会话验证调度器 -->
+    <bean id="sessionValidationScheduler" class="org.apache.shiro.session.mgt.quartz.QuartzSessionValidationScheduler">
+        <property name="sessionValidationInterval" value="${shiro.session.sessionValidationInterval}"/>
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+    
+    <!-- 跟踪用户会话记录 -->
+    <bean id="userSessionListener" class="org.youngtao.blog.permission.listen.UserSessionListener" />
+    
+    <!-- 会话管理器 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="globalSessionTimeout" value="${shiro.session.globalSessionTimeout}"/>
+        <property name="deleteInvalidSessions" value="${shiro.session.deleteInvalidSessions}"/>
+        <property name="sessionValidationSchedulerEnabled" value="${shiro.session.sessionValidationSchedulerEnabled}"/>
+        <property name="sessionIdCookieEnabled" value="true" />
+        <property name="sessionValidationScheduler" ref="sessionValidationScheduler"/>
+        <property name="sessionDAO" ref="sessionDAO"/>
+        <property name="sessionIdCookie" ref="sessionIdCookie" />
+         <property name="sessionListeners" ref="userSessionListener" /> 
+    </bean>
+    
+    <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMe"/>
+        <property name="httpOnly" value="${shiro.rememberMe.httpOnly}"/>
+        <property name="maxAge" value="${shiro.rememberMe.maxAge}"/><!-- 30 days -->
+    </bean>
+    
+    <!-- rememberMe管理器  -->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cipherKey" value="${shiro.rememberMe.cipherKey}"/>
+        <property name="cookie" ref="rememberMeCookie"/>
+    </bean>
+    
+    <!-- 安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realms">
+            <list>
+                <ref bean="userRealm"/>
+            </list>
+        </property>
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="rememberMeManager" ref="rememberMeManager"/>
+    </bean>
+    
+    <!-- 相当于调用SecurityUtils.setSecurityManager(securityManager) -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="org.apache.shiro.SecurityUtils.setSecurityManager"/>
+        <property name="arguments" ref="securityManager"/>
+    </bean>
+    
+    <!-- 自定义验证拦截器 基于Form表单的身份验证过滤器-->  
+    <bean id="mySignCaptchaFilter" class="org.youngtao.blog.permission.filter.CaptchaFormAuthenticationFilter">
+    	<!--表单上的用户名/密码 下次自动登录的参数名-->
+        <property name="usernameParam" value="${shiro.from.usernameParam}"/>
+        <property name="passwordParam" value="${shiro.from.passwordParam}"/>
+        <property name="rememberMeParam" value="${shiro.from.rememberMeParam}" />
+        <property name="loginUrl" value="${shiro.fillter.loginUrl}"/>
+        <property name="failureKeyAttribute" value="${shiro.from.failureKeyAttribute}" />
+    </bean>
+    
+    <bean id="logoutFilter" class="org.youngtao.blog.permission.filter.AuthLogoutFillter">
+    	<property name="redirectUrl" value="${shiro.fillter.logout}" />
+	</bean>
+	
+	<!-- 自定义加入filter，起在remember me session失效情况下刷新session作用 -->  
+	<bean id="userSessionFillter" class="org.youngtao.blog.permission.session.UserSessionFillter" />
+    
+    <bean id="kickoutSessionControlFilter" class="org.youngtao.blog.permission.filter.KickoutSessionControlFilter">  
+        <property name="cacheManager" ref="cacheManager"/>  
+        <property name="sessionManager" ref="sessionManager"/> 
+        <!-- 是否踢出后来登录的，默认是false；即后者登录的用户踢出前者登录的用户 --> 
+        <property name="kickoutAfter" value="false"/>  
+        <!-- 同一个用户最大的会话数，默认1；比如2的意思是同一个用户允许最多同时两个人登录 -->
+        <property name="maxSession" value="1"/>  
+        <property name="kickoutUrl" value="/redirect/login?kickout=1"/>  
+    </bean>
+    
+    <!-- 强制踢出用户会话 -->  
+	<bean id="forcelogoutUserSession" class="org.youngtao.blog.permission.filter.ForceLogoutFilter" />
+    
+    <!-- Shiro的Web过滤器 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="${shiro.fillter.loginUrl}"/>
+        <!-- 登录成功后跳转路径 -->  
+        <property name="successUrl" value="${shiro.fillter.successUrl}" />
+        <property name="unauthorizedUrl" value="${shiro.fillter.unauthorizedUrl}"/>
+        <property name="filters">
+            <util:map>
+                <entry key="authc" value-ref="mySignCaptchaFilter"/>
+                <entry key="logout" value-ref="logoutFilter" />
+                <entry key="userSession" value-ref="userSessionFillter" />
+                <entry key="kickout" value-ref="kickoutSessionControlFilter"/>
+                <entry key="forcelogout" value-ref="forcelogoutUserSession"/>
+            </util:map>
+        </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /pages/public/** = anon
+                /common/** = anon
+                /static/** = anon
+                / = anon
+                /logout = logout
+                /login = authc
+                /** = forcelogout,user,userSession,kickout,perms,roles,authc
+            </value>
+        </property>
+    </bean>
+    
+    <!-- aop and other-->
+    <!-- For simplest integration, so that all SecurityUtils.* methods work in all cases, -->
+    <!-- make the securityManager bean a static singleton.  DO NOT do this in web         -->
+    <!-- applications - see the 'Web Applications' section below instead.                 -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="org.apache.shiro.SecurityUtils.setSecurityManager"/>
+        <property name="arguments" ref="securityManager"/>
+    </bean>
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+</beans>

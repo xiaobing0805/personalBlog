@@ -1,0 +1,25 @@
+.am-pagination>li>a, .am-pagination>li>span{
+	margin-right: -5px;
+}
+.am-pagination{
+	margin: 0rem 0;
+}
+.admin-content{
+	overflow-y: hidden;
+}
+.am-table>tbody>tr>td, .am-table>thead>tr>th{
+	color:#333;
+}
+.am-table{
+	margin-bottom: 0.6rem;
+	font-size: 12px;
+}
+.am-padding{
+	padding: 0rem;
+}
+.admin-content{
+	border-top: 3px solid #5b9bd1;
+}
+.admin-header{
+	z-index: 500; /* 1500 */
+}
